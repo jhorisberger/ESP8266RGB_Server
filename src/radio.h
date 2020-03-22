@@ -1,12 +1,12 @@
 #ifndef _RADIO_H
 #define _RADIO_H
 
-
+    #include <esp_now.h>
 
     // User Setup
     #define WIFI_CHANNEL 4
+    #define CLIENT_ID 0
     const uint8_t broadcastMac[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-    esp_now_peer_info_t peerInfo;
     
 
 
@@ -38,18 +38,21 @@
     } struct_frame;
 
     
-    class EspNow8266 {
+    class EspNow32 {
         private:
         // Create a struct_message to hold incoming Frame, Payload and Data 
         
         public:
-        EspNow8266();
-        void setup(void);
-        static void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status);
-        static void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len);
+            EspNow32();
+            void setup(void);
+            uint8_t payloadTx(struct_payload payload);
+            void printFrame(struct_frame frame);
 
         private:
-        uint8_t evalRxFrame(struct_frame Payload);
+            static void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status);
+            static void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len);
+            static uint8_t evalRxFrame(struct_frame Payload, uint8_t clientId);
+            uint8_t CRCcalc(struct_payload payload);
 	};
     
 

@@ -1,55 +1,44 @@
-#include <esp_now.h>
-#include <WiFi.h>
+#include <Arduino.h>
 #include "radio.h"
 #include "tft.h"
 
 
 
-EspNow8266 radio;
+EspNow32 radio;
 CustomTFT tft;
 
 
 struct_payload txdata;
 uint8_t Counter = 0;
-unsigned long LastSend;
 
-
-void evaluateRx(struct_data RxData){
-  float roundtripTime = (micros() - float(LastSend))/1000;
-  if (RxData.Command == Counter && roundtripTime < 1000){
-      Serial.print("Ping Time: "); Serial.print(roundtripTime, 3); Serial.println(" ms");
-  }
-  else{
-     Serial.println("Packet lost!");
-  }
-}
 
 
 
 void setup() {
   // start serial port
   Serial.begin(115200);
-  Serial.println("");
-  Serial.println("ESP8266 RGB controller server Debug");
-  Serial.println("-----------------------------------");
+  Serial.println("\n\nESP8266 RGB controller server Debug \n -----------------------------------");
 
   // Setup TFT Display
   tft.setup();
 
   // Setup Radio
   radio.setup();
-  }
+}
+
 
 void loop() {
 
-  Serial.println("Tick");
-
   Counter ++;
-  txdata.Data.Command = Counter;
-  LastSend = micros();
+  if (Counter > 3) Counter = 0;
+  txdata.SubSet_Type = 1;
+  txdata.Subset_Index = Counter;
+  txdata.SubSet_Range = 1;
 
-  // Send message via ESP-NOW
-  esp_now_send(broadcastMac, (uint8_t *) &txdata, sizeof(txdata));
+  Serial.printf("\n\nTestdata Sent. Counter: %d\n",Counter);
+
+  radio.payloadTx(txdata);
+
 
   delay(5000);
 }
