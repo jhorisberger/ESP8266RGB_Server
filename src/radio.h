@@ -4,7 +4,7 @@
     #include <esp_now.h>
 
     // User Setup
-    #define WIFI_CHANNEL 4
+    #define WIFI_CHANNEL 0
     #define CLIENT_ID 0
     const uint8_t broadcastMac[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
     

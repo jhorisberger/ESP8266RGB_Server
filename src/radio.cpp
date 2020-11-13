@@ -52,7 +52,7 @@ void EspNow32::OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
 void EspNow32::OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   struct_frame frame;
   memcpy(&frame, incomingData, sizeof(frame));
-  Serial.println(" ----------\n| Rx frame |\n ----------");
+  Serial.println(" ----------| Rx frame |----------");
   _radio.printFrame(frame);
   evalRxFrame(frame, CLIENT_ID);
 };
@@ -88,8 +88,8 @@ uint8_t EspNow32::payloadTx(struct_payload payload){
   
   txFrame.CRC =_radio.CRCcalc(payload);
 
-  //Serial.println("\n \n Tx frame:");
-  //printFrame(txFrame);
+  Serial.println(" ----------| Tx frame | ----------");
+  printFrame(txFrame);
   return esp_now_send(broadcastMac, (uint8_t *) &txFrame, sizeof(txFrame));
 }
 
@@ -103,6 +103,6 @@ uint8_t EspNow32::CRCcalc(struct_payload payload){
 // debug print frame 
 void EspNow32::printFrame(struct_frame frame){
   Serial.printf("Key: %#x , CRC %d \n" , frame.Key, frame.CRC);
-  Serial.printf("Subset: %#x %#x %#x , Data %#x | %#x %#x %#x %#x %#x \n" , frame.Payload.SubSet_Type, frame.Payload.Subset_Index, frame.Payload.SubSet_Range, frame.Payload.Data.Command, frame.Payload.Data.Data0, frame.Payload.Data.Data1, frame.Payload.Data.Data2, frame.Payload.Data.Data3, frame.Payload.Data.Data4);
+  Serial.printf("Subset: %#x %#x %#x , Data %#x | %#x %#x %#x %#x %#x \n\n" , frame.Payload.SubSet_Type, frame.Payload.Subset_Index, frame.Payload.SubSet_Range, frame.Payload.Data.Command, frame.Payload.Data.Data0, frame.Payload.Data.Data1, frame.Payload.Data.Data2, frame.Payload.Data.Data3, frame.Payload.Data.Data4);
 }
 

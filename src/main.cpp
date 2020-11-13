@@ -9,7 +9,11 @@ CustomTFT tft;
 
 
 struct_payload txdata;
-uint8_t Counter = 0;
+const byte numChars = 16;
+char receivedChars[numChars]; // an array to store the received data
+int testdata = 0;
+boolean newData = false;
+
 
 
 
@@ -26,19 +30,59 @@ void setup() {
   radio.setup();
 }
 
+void recvWithEndMarker() {
+  static byte ndx = 0;
+  char endMarker = '\r';
+  char rc;
+ 
+  //if (Serial.available() > 0) {
+  while (Serial.available() > 0 && newData == false) {
+    rc = Serial.read();
+
+    if (rc != endMarker) {
+      receivedChars[ndx] = rc;
+      ndx++;
+      if (ndx >= numChars) {
+        ndx = numChars - 1;
+      }
+    }
+      else {
+      receivedChars[ndx] = '\0'; // terminate the string
+      ndx = 0;
+      newData = true;
+    }
+  }
+}
+
+void showNewData() {
+ if (newData == true) {
+  Serial.print("\n This just in ... ");
+  Serial.println(receivedChars);
+  Serial.println("Sending Testdata...");
+  testdata = atoi(receivedChars);
+
+  txdata.SubSet_Type = 1;       // Select range
+  txdata.Subset_Index = 1;      // ID 1
+  txdata.SubSet_Range = 1;      // Range 1
+
+  txdata.Data.Command = 0xF0;   // Set Color Direct
+
+  txdata.Data.Data0 = testdata;
+  txdata.Data.Data1 = testdata/2;
+  txdata.Data.Data2 = testdata/10;
+  txdata.Data.Data3 = 0;
+
+  
+  radio.payloadTx(txdata);
+
+  newData = false;
+  }
+};
 
 void loop() {
 
-  Counter ++;
-  if (Counter > 3) Counter = 0;
-  txdata.SubSet_Type = 1;
-  txdata.Subset_Index = Counter;
-  txdata.SubSet_Range = 1;
+  recvWithEndMarker();
+  showNewData();
 
-  Serial.printf("\n\nTestdata Sent. Counter: %d\n",Counter);
-
-  radio.payloadTx(txdata);
-
-
-  delay(5000);
 }
+
